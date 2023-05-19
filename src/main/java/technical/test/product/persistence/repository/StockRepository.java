@@ -21,8 +21,8 @@ public class StockRepository {
              CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT)) {
 
             return csvParser.stream().map(record -> Stock.builder()
-                    .sizeId(Integer.valueOf(record.get(0)))
-                    .quantity(Integer.valueOf(record.get(1)))
+                    .sizeId(Integer.valueOf(record.get(0).trim()))
+                    .quantity(Integer.valueOf(record.get(1).trim()))
                     .build()).toList();
 
         }

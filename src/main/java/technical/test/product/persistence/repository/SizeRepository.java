@@ -21,10 +21,10 @@ public class SizeRepository {
              CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT)) {
 
             return csvParser.stream().map(record -> Size.builder()
-                    .id(Integer.valueOf(record.get(0)))
-                    .productId(Integer.valueOf(record.get(1)))
-                    .backSoon(Boolean.valueOf(record.get(2)))
-                    .special(Boolean.valueOf(record.get(3)))
+                    .id(Integer.valueOf(record.get(0).trim()))
+                    .productId(Integer.valueOf(record.get(1).trim()))
+                    .backSoon(Boolean.valueOf(record.get(2).trim()))
+                    .special(Boolean.valueOf(record.get(3).trim()))
                     .build()).toList();
 
         }

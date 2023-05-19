@@ -12,4 +12,5 @@ public class Size {
     private Integer productId;
     private Boolean backSoon;
     private Boolean special;
+    private Stock stock;
 }
