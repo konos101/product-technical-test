@@ -2,7 +2,8 @@ package technical.test.product.persistence.repository;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Repository;
 import technical.test.product.persistence.entity.Stock;
 
 import java.io.IOException;
@@ -11,13 +12,16 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-@Service
+@Repository
 public class StockRepository {
+    private final String csvFilePath;
 
-    private static final String CSV_FILE_PATH = "src/main/resources/datasource/stock.csv";
+    public StockRepository(@Value("${datasource.stock.path}") String csvFilePath) {
+        this.csvFilePath = csvFilePath;
+    }
 
     public List<Stock> getAll() throws IOException {
-        try (Reader reader = Files.newBufferedReader(Paths.get(CSV_FILE_PATH));
+        try (Reader reader = Files.newBufferedReader(Paths.get(csvFilePath));
              CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT)) {
 
             return csvParser.stream().map(record -> Stock.builder()
