@@ -4,11 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import technical.test.product.persistence.entity.Product;
+import technical.test.product.persistence.entity.Size;
+import technical.test.product.persistence.entity.Stock;
 import technical.test.product.persistence.repository.ProductRepository;
 import technical.test.product.persistence.repository.SizeRepository;
 import technical.test.product.persistence.repository.StockRepository;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,16 +23,14 @@ public class ProductService {
     private final StockRepository stockRepository;
 
     public List<Product> getAvailableProducts() {
-        var productList = establishRelationships();
-
-        return productList.stream()
-                .map(this::backSoonSizeFilter)
-                .map(this::specialSizeFilter)
+        return getData().stream()
+                .map(this::filterProductByBackSoon)
+                .map(this::filterProductBySpecial)
                 .filter(product -> !product.getSizes().isEmpty())
                 .toList();
     }
 
-    private Product backSoonSizeFilter(Product product) {
+    private Product filterProductByBackSoon(Product product) {
         return Product.builder()
                 .id(product.getId())
                 .sequence(product.getSequence())
@@ -42,7 +41,7 @@ public class ProductService {
                 .build();
     }
 
-    private Product specialSizeFilter(Product product) {
+    private Product filterProductBySpecial(Product product) {
         boolean hasSpecialStock = product.getSizes().stream()
                 .anyMatch(size ->
                         size.getBackSoon() && size.getSpecial() ||
@@ -65,28 +64,32 @@ public class ProductService {
         return product;
     }
 
-    private List<Product> establishRelationships() {
+    private List<Product> getData() {
         try {
             var productList = productRepository.getAll();
             var sizeList = sizeRepository.getAll();
             var stockList = stockRepository.getAll();
 
-            sizeList.forEach(size -> size.setStock(stockList.stream()
-                    .filter(stock -> Objects.equals(stock.getSizeId(), size.getId()))
-                    .findFirst()
-                    .orElse(null)
-            ));
-
-            productList.forEach(product ->
-                    product.setSizes(sizeList.stream()
-                            .filter(size -> Objects.equals(product.getId(), size.getProductId()))
-                            .toList()
-                    ));
+            establishRelationships(productList, sizeList, stockList);
 
             return productList;
         } catch (Exception e) {
             throw new RuntimeException("Something went wrong retrieving the data");
         }
+    }
+
+    private void establishRelationships(List<Product> productList, List<Size> sizeList, List<Stock> stockList) {
+        sizeList.forEach(size -> size.setStock(stockList.stream()
+                .filter(stock -> Objects.equals(stock.getSizeId(), size.getId()))
+                .findFirst()
+                .orElse(null)
+        ));
+
+        productList.forEach(product ->
+                product.setSizes(sizeList.stream()
+                        .filter(size -> Objects.equals(product.getId(), size.getProductId()))
+                        .toList()
+                ));
     }
 
 }

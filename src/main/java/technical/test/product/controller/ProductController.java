@@ -23,8 +23,7 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<String> getAvailableProducts() {
         return ResponseEntity
-                .ok()
-                .body(productService.getAvailableProducts().stream()
+                .ok(productService.getAvailableProducts().stream()
                         .sorted(Comparator.comparingInt(Product::getSequence))
                         .map(product -> product.getId().toString())
                         .collect(Collectors.joining(",")));
