@@ -30,6 +30,34 @@ public class ProductService {
                 .toList();
     }
 
+    private List<Product> getData() {
+        try {
+            var productList = productRepository.getAll();
+            var sizeList = sizeRepository.getAll();
+            var stockList = stockRepository.getAll();
+
+            establishRelationships(productList, sizeList, stockList);
+
+            return productList;
+        } catch (Exception e) {
+            throw new RuntimeException("Something went wrong retrieving the data");
+        }
+    }
+
+    private void establishRelationships(List<Product> productList, List<Size> sizeList, List<Stock> stockList) {
+        sizeList.forEach(size -> size.setStock(stockList.stream()
+                .filter(stock -> Objects.equals(stock.getSizeId(), size.getId()))
+                .findFirst()
+                .orElse(null)
+        ));
+
+        productList.forEach(product ->
+                product.setSizes(sizeList.stream()
+                        .filter(size -> Objects.equals(product.getId(), size.getProductId()))
+                        .toList()
+                ));
+    }
+
     private Product filterProductByBackSoon(Product product) {
         return Product.builder()
                 .id(product.getId())
@@ -63,33 +91,4 @@ public class ProductService {
         }
         return product;
     }
-
-    private List<Product> getData() {
-        try {
-            var productList = productRepository.getAll();
-            var sizeList = sizeRepository.getAll();
-            var stockList = stockRepository.getAll();
-
-            establishRelationships(productList, sizeList, stockList);
-
-            return productList;
-        } catch (Exception e) {
-            throw new RuntimeException("Something went wrong retrieving the data");
-        }
-    }
-
-    private void establishRelationships(List<Product> productList, List<Size> sizeList, List<Stock> stockList) {
-        sizeList.forEach(size -> size.setStock(stockList.stream()
-                .filter(stock -> Objects.equals(stock.getSizeId(), size.getId()))
-                .findFirst()
-                .orElse(null)
-        ));
-
-        productList.forEach(product ->
-                product.setSizes(sizeList.stream()
-                        .filter(size -> Objects.equals(product.getId(), size.getProductId()))
-                        .toList()
-                ));
-    }
-
 }
