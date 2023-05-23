@@ -10,8 +10,11 @@ import technical.test.product.persistence.repository.ProductRepository;
 import technical.test.product.persistence.repository.SizeRepository;
 import technical.test.product.persistence.repository.StockRepository;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -24,9 +27,15 @@ public class ProductService {
 
     public List<Product> getAvailableProducts() {
         return getData().stream()
-                .map(this::filterProductByBackSoon)
-                .map(this::filterProductBySpecial)
-                .filter(product -> !product.getSizes().isEmpty())
+                .filter(product -> {
+                    Set<Size> backSoonSizes = filterProductByBackSoon(product.getSizes());
+                    Set<Size> specialSizes = filterProductBySpecial(
+                            product.getSizes().stream()
+                                    .filter(backSoonSizes::contains)
+                                    .collect(Collectors.toList())
+                    );
+                    return product.getSizes().stream().anyMatch(specialSizes::contains);
+                })
                 .toList();
     }
 
@@ -58,37 +67,29 @@ public class ProductService {
                 ));
     }
 
-    private Product filterProductByBackSoon(Product product) {
-        return Product.builder()
-                .id(product.getId())
-                .sequence(product.getSequence())
-                .sizes(product.getSizes().stream()
-                        .filter(size ->
-                                size.getBackSoon() || (null != size.getStock() && size.getStock().getQuantity() > 0))
-                        .toList())
-                .build();
+    private Set<Size> filterProductByBackSoon(List<Size> sizes) {
+        return sizes.stream()
+                .filter(size ->
+                        size.getBackSoon() || (null != size.getStock() && size.getStock().getQuantity() > 0))
+                .collect(Collectors.toSet());
     }
 
-    private Product filterProductBySpecial(Product product) {
-        boolean hasSpecialStock = product.getSizes().stream()
+    private Set<Size> filterProductBySpecial(List<Size> sizes) {
+        boolean hasSpecialStock = sizes.stream()
                 .anyMatch(size ->
                         size.getBackSoon() && size.getSpecial() ||
                                 (null != size.getStock() && size.getStock().getQuantity() > 0 && size.getSpecial()));
 
-        boolean hasRegularStock = product.getSizes().stream()
+        boolean hasRegularStock = sizes.stream()
                 .anyMatch(size ->
                         size.getBackSoon() && !size.getSpecial()
                                 || (null != size.getStock() && size.getStock().getQuantity() > 0 && !size.getSpecial()));
 
         if (!hasSpecialStock || !hasRegularStock) {
-            return Product.builder()
-                    .id(product.getId())
-                    .sequence(product.getSequence())
-                    .sizes(product.getSizes().stream()
-                            .filter(size -> !size.getSpecial())
-                            .toList())
-                    .build();
+            return sizes.stream()
+                    .filter(size -> !size.getSpecial())
+                    .collect(Collectors.toSet());
         }
-        return product;
+        return new HashSet<>(sizes);
     }
 }
