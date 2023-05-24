@@ -20,6 +20,16 @@ public class TestConstants {
             .quantity(0)
             .build();
 
+    public static final Stock STOCK_ENTITY_4 = Stock.builder()
+            .sizeId(7)
+            .quantity(0)
+            .build();
+
+    public static final Stock STOCK_ENTITY_5 = Stock.builder()
+            .sizeId(8)
+            .quantity(10)
+            .build();
+
     public static final Size SIZE_ENTITY_1 = Size.builder()
             .id(1)
             .backSoon(false)
@@ -62,6 +72,27 @@ public class TestConstants {
             .special(false)
             .build();
 
+    public static final Size SIZE_ENTITY_7 = Size.builder()
+            .id(7)
+            .backSoon(true)
+            .productId(4)
+            .special(true)
+            .build();
+
+    public static final Size SIZE_ENTITY_8 = Size.builder()
+            .id(8)
+            .backSoon(false)
+            .productId(4)
+            .special(false)
+            .build();
+
+    public static final Size SIZE_ENTITY_9 = Size.builder()
+            .id(9)
+            .backSoon(true)
+            .productId(5)
+            .special(false)
+            .build();
+
     public static final Product PRODUCT_ENTITY_1 = Product.builder()
             .id(1)
             .sequence(3)
@@ -75,5 +106,15 @@ public class TestConstants {
     public static final Product PRODUCT_ENTITY_3 = Product.builder()
             .id(3)
             .sequence(2)
+            .build();
+
+    public static final Product PRODUCT_ENTITY_4 = Product.builder()
+            .id(4)
+            .sequence(10)
+            .build();
+
+    public static final Product PRODUCT_ENTITY_5 = Product.builder()
+            .id(5)
+            .sequence(4)
             .build();
 }
